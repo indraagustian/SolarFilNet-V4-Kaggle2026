@@ -92,37 +92,61 @@ The notebook automatically:
 ## 🧠 Architectural Highlights
 
 ```
-                                  Input Image (2048 x 2048)
-                                              │
-                              ┌───────────────┴───────────────┐
-                              ▼                               ▼
-                 Shallow Full-Res Branch (F0)     Physics-Informed Preprocessing
-                  [Conv 3x3, BatchNorm, GELU]      [Ch0: Contrast, Ch1: Residue, Ch2: CLAHE]
-                              │                               │
-                              │                  PVT-v2-B1 Multi-Scale Backbone
-                              │                  [Stages 1, 2, 3, 4 Features]
-                              │                               │
-                              │                  Curvilinear Bottleneck (k=15)
-                              │                     + DFFN Residual Gate
-                              │                               │
-                              ▼                               ▼
-                       Feature Pyramid Decoder (Levels 3 -> 2 -> 1)
-                                              │
-                                              ▼
-                                Full-Resolution Decoder (D0)
-                                              │
-                       ┌──────────────────────┼──────────────────────┐
-                       ▼                      ▼                      ▼
-                   Mask Head              Spine Head             Edge Head
-                (Filament Body)        (Center Skeleton)      (Barb Boundaries)
+                           Raw GONG H-Alpha Image (2048 x 2048)
+                                            │
+                                            ▼
+                           Physics-Informed Preprocessing
+                     [Ch0: Solar Contrast, Ch1: Residue, Ch2: CLAHE]
+                                            │
+                                            ▼
+                             Spatial Resize to (1024 x 1024)
+                                            │
+                            ┌───────────────┴───────────────┐
+                            ▼                               ▼
+               Shallow Full-Res Branch (F0)     PVT-v2-B1 Multi-Scale Backbone
+               [Conv 3x3, BatchNorm, GELU]      [Stages C1(1/4), C2(1/8), C3(1/16), C4(1/32)]
+                            │                               │
+                            │                 Curvilinear Bottleneck (k=15)
+                            │                    + DFFN Residual Gate
+                            │                               │
+                            │                 Feature Pyramid Decoder
+                            │                 [Levels C3 -> C2 -> C1]
+                            │                               │
+                            ▼                               ▼
+                     ┌──────────────────────────────────────────────┐
+                     │         Full-Resolution Decoder (D0)         │
+                     │    (Fuses Shallow F0 @ 1024 + Deep D3 @ 1024)│
+                     └──────────────────────┬───────────────────────┘
+                                            │
+                     ┌──────────────────────┼──────────────────────┐
+                     ▼                      ▼                      ▼
+                 Mask Head              Spine Head             Edge Head
+              (Filament Body)        (Center Skeleton)      (Barb Boundaries)
+                                            │
+                                            ▼ (Sigmoid)
+                            Predicted Probability (1024 x 1024)
+                                            │
+                                            ▼ [Bilinear Interpolation]
+                           Full-Resolution Probability (2048 x 2048)
+                                            │
+                                            ▼
+                           Solar Regime Adaptive Post-Processing
+                            (Quiet Sun vs. Active Sun Thresholds)
+                                            │
+                                            ▼
+                           Official COCO RLE Masks (2048 x 2048)
 ```
 
-1. **Curvilinear Strip Convolution (`CurvilinearStripConv`)**:
-   Standard isotropic square kernels ($3 \times 3$ or $5 \times 5$) fail to capture thin, meandering filament spines. We use coupled parallel $1 \times k$ and $k \times 1$ asymmetric strip convolutions ($k=15$) to trace extended solar magnetic flux ropes.
-2. **Dual-Frequency Context (`DFFNBlock`)**:
+1. **Two-Stage Multi-Scale Pipeline ($2048 \to 1024 \to 2048$)**:
+   The full $2048 \times 2048$ H-alpha disk is first enhanced physically into 3 chromospheric channels, then resized to $1024 \times 1024$ for global attention reasoning. After multi-task decoding, the aggregated probability map is bilinearly upscaled back to native $2048 \times 2048$ where instance segmentation and official COCO RLE encoding take place.
+2. **Shallow Full-Resolution Branch ($F_0$)**:
+   Because the PVT-v2 transformer downsamples features by $4\times$ right at Stage 1 ($C_1 = 256 \times 256$), the shallow $F_0$ convolutional branch operates at the full $1\times$ input scale ($1024 \times 1024$) to preserve razor-sharp boundary details and fine filament barbs without spatial degradation.
+3. **Curvilinear Strip Convolution (`CurvilinearStripConv`)**:
+   Standard isotropic square kernels ($3 \times 3$ or $5 \times 5$) fail to capture thin, meandering filament spines. We use coupled parallel $1 \times k$ and $k \times 1$ asymmetric strip convolutions ($k=15$ in bottleneck, $k=9$ in mask head, $k=11$ in spine head) to trace extended solar magnetic flux ropes.
+4. **Dual-Frequency Context (`DFFNBlock`)**:
    Gated depthwise convolutions with complementary receptive fields (local $3 \times 3$ and dilated $3 \times 3$, $d=2$) enable joint learning of high-frequency spine ridges and low-frequency filament envelopes.
-3. **Multi-Task Topology Guidance**:
-   The model is trained with composite supervision including Soft Dice Loss, Focal Tversky Loss, Centerline Dice (`clDice`), and Pixel-Contrastive Loss (`PCL`) to preserve continuity.
+5. **Multi-Task Topology Guidance**:
+   The model is trained with composite supervision including Soft Dice Loss, Focal Tversky Loss, Centerline Dice (`clDice`), Boundary-Aware Loss, and Pixel-Contrastive Loss (`PCL`) to preserve continuity.
 
 ---
 
