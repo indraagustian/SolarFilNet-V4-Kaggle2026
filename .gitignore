@@ -1,0 +1,32 @@
+# Python & Environment
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.env
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# OS generated
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Large dataset archives & unzipped test images (users download directly from Kaggle)
+*.zip
+*.tar
+*.gz
+test_images/
+train_images/
+MAGFiLO_1.0_Kaggle_2026/
+cache/
+
+# Only track the official best model checkpoint (59 MB)
+weights/*.pt
+!weights/ckpt_solarfilnet_v4.pt
+
+desktop.ini
