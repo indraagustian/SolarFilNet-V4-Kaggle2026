@@ -10,7 +10,6 @@ Provides:
 from typing import Dict, List, Tuple
 import cv2
 import numpy as np
-import torch
 from pycocotools import mask as mask_utils
 
 

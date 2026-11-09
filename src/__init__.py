@@ -1,5 +1,9 @@
 # SolarFilNet-V4 Package
-from .model import SolarFilNetV4, CurvilinearStripConv, DFFNBlock
+try:
+    from .model import SolarFilNetV4, CurvilinearStripConv, DFFNBlock
+except ImportError:
+    SolarFilNetV4, CurvilinearStripConv, DFFNBlock = None, None, None
+
 from .config import SolarFilNetV4Config
 from .postproc import (
     adaptive_solar_preprocess,
