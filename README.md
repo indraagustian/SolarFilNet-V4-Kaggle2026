@@ -68,8 +68,8 @@ SolarFilNet-V4-Submission/
 
 Clone this repository and install all required packages:
 ```bash
-git clone https://github.com/<your-username>/SolarFilNet-V4.git
-cd SolarFilNet-V4
+git clone https://github.com/indraagustian/SolarFilNet-V4-Kaggle2026.git
+cd SolarFilNet-V4-Kaggle2026
 pip install -r requirements.txt
 ```
 
@@ -152,9 +152,9 @@ This codebase is licensed under the [MIT License](LICENSE).
 ```bibtex
 @misc{solarfilnet2026,
   title={SolarFilNet-V4: Physics-Informed Multi-Scale Neural Vision for Solar Filament Segmentation},
-  author={SolarFilNet Team},
+  author={Indra Agustian and Contributors},
   year={2026},
   publisher={GitHub},
-  howpublished={\url{https://github.com/<your-username>/SolarFilNet-V4}}
+  howpublished={\url{https://github.com/indraagustian/SolarFilNet-V4-Kaggle2026}}
 }
 ```
