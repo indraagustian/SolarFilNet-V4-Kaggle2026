@@ -174,9 +174,10 @@ where:
 This codebase is licensed under the [MIT License](LICENSE).
 
 ```bibtex
-@misc{solarfilnet2026,
-  title={SolarFilNet-V4: Physics-Informed Multi-Scale Neural Vision for Solar Filament Segmentation},
-  author={Indra Agustian and Contributors},
+@misc{agustian2026solarfilnetv4,
+  title={SolarFilNet-V4: Multi-Scale Transformer Vision with Physics-Informed Adaptive Post-Processing for Solar Filament Segmentation},
+  author={Indra Agustian},
+  affiliation={Universitas Bengkulu},
   year={2026},
   publisher={GitHub},
   howpublished={\url{https://github.com/indraagustian/SolarFilNet-V4-Kaggle2026}}
