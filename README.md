@@ -176,7 +176,7 @@ This codebase is licensed under the [MIT License](LICENSE).
 ```bibtex
 @misc{agustian2026solarfilnetv4,
   title={SolarFilNet-V4: Multi-Scale Transformer Vision with Physics-Informed Adaptive Post-Processing for Solar Filament Segmentation},
-  author={Indra Agustian},
+  author={Indra Agustian and Ruvita Faurina},
   affiliation={Universitas Bengkulu},
   year={2026},
   publisher={GitHub},
